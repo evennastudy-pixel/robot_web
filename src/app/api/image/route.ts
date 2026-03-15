@@ -60,16 +60,17 @@ const falConfig = {
         throw new Error('No image URL found in FAL response');
       }
 
-// 备用客户端列表（如果 FAL AI 不可用时使用）
-const fallbackClients = [
-  // DeepSeek API（使用 OpenAI SDK，因为 API 兼容）
-  new OpenAI({
-    apiKey: process.env.DEEPSEEK_API_KEY,
-    baseURL: 'https://api.deepseek.com',
-    timeout: 60000,
-    maxRetries: 2
-  })
-];
+// 备用客户端（如果 FAL AI 不可用时使用），懒加载避免构建期报错
+function getFallbackClients() {
+  return [
+    new OpenAI({
+      apiKey: process.env.DEEPSEEK_API_KEY || 'placeholder',
+      baseURL: 'https://api.deepseek.com',
+      timeout: 60000,
+      maxRetries: 2
+    })
+  ];
+}
 
 export async function POST(req: Request) {
   try {
