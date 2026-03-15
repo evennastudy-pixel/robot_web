@@ -1,6 +1,9 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
+// 延长 Vercel 最大执行时间（Hobby: 60s，Pro: 300s）
+export const maxDuration = 60;
+
 function getClient() {
   return new OpenAI({
     apiKey: process.env.DEEPSEEK_API_KEY || 'placeholder',
@@ -258,48 +261,45 @@ ${theme ? `主题：${theme.title} - ${theme.titleEn}
       `你是一位专业的设计报告撰写专家。重要：你必须严格按用户选择的视觉风格生成报告。不同风格对应不同的配色、背景和美学，切换风格时报告外观必须明显不同。按用户消息中的具体CSS/配色要求执行。生成的所有内容必须使用中文。`;
 
     const client = getClient();
-    const completion = await client.chat.completions.create({
+
+    // 使用流式 API，边生成边推送，避免 Vercel serverless 超时
+    const stream = await client.chat.completions.create({
       model: 'deepseek-chat',
       messages: [
-        {
-          role: 'system',
-          content: systemMessage
-        },
-        {
-          role: 'user',
-          content: prompt
-        }
+        { role: 'system', content: systemMessage },
+        { role: 'user', content: prompt }
       ],
       temperature: 0.5,
       max_tokens: 8192,
+      stream: true,
     });
 
-    let htmlReport = completion.choices[0]?.message?.content || '';
+    const encoder = new TextEncoder();
+    const readable = new ReadableStream({
+      async start(controller) {
+        try {
+          for await (const chunk of stream) {
+            const content = chunk.choices[0]?.delta?.content || '';
+            if (content) {
+              controller.enqueue(encoder.encode(content));
+            }
+          }
+          controller.close();
+        } catch (err) {
+          controller.error(err);
+        }
+      }
+    });
 
-    // 清理可能的markdown代码块标记
-    htmlReport = htmlReport.replace(/```html\n?/g, '').replace(/```\n?/g, '').trim();
+    console.log('✅ 方案报告流式生成启动');
 
-    // 确保HTML有基本结构
-    if (!htmlReport.includes('<!DOCTYPE html>') && !htmlReport.includes('<html')) {
-      htmlReport = `<!DOCTYPE html>
-<html lang="zh-CN">
-<head>
-  <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>${solution.projectName?.zh || '太空设计方案'} - 设计报告</title>
-</head>
-<body>
-${htmlReport}
-</body>
-</html>`;
-    }
-
-    console.log('✅ 方案报告生成完成');
-    console.log('📄 HTML长度:', htmlReport.length);
-
-    return NextResponse.json({
-      html: htmlReport,
-      success: true
+    return new Response(readable, {
+      headers: {
+        'Content-Type': 'text/plain; charset=utf-8',
+        'Transfer-Encoding': 'chunked',
+        'X-Content-Type-Options': 'nosniff',
+        'Cache-Control': 'no-cache',
+      },
     });
 
   } catch (error) {

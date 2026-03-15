@@ -2,7 +2,6 @@
 
 import React, { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import axios from 'axios';
 import WorkshopNavigation from '@/components/WorkshopNavigation';
 import { useLanguage, t } from '@/hooks/useLanguage';
 
@@ -90,39 +89,67 @@ export default function SolutionReviewPage() {
 
     setIsGenerating(true);
     try {
-      console.log('📡 调用API生成报告...', { style: styleToUse, format: formatToUse });
-      
+      console.log('📡 调用API生成报告（流式）...', { style: styleToUse, format: formatToUse });
+
       let fullFeedback = userFeedback;
       if (customStyleInput.trim()) {
         fullFeedback = fullFeedback ? `${fullFeedback}\n\n排版风格要求: ${customStyleInput}` : `排版风格要求: ${customStyleInput}`;
       }
-      
-      const response = await axios.post('/api/generate-report', {
-        solution,
-        theme,
-        style: styleToUse,
-        format: formatToUse,
-        userFeedback: fullFeedback
-      }, { timeout: 360000 }); // 6 分钟，应对复杂报告生成
 
-      if (response.data?.success === false) {
-        throw new Error(response.data?.message || 'API returned fallback, model may not have been called');
+      // 使用 fetch + ReadableStream，边生成边接收，避免超时
+      const res = await fetch('/api/generate-report', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          solution,
+          theme,
+          style: styleToUse,
+          format: formatToUse,
+          userFeedback: fullFeedback,
+        }),
+      });
+
+      if (!res.ok) {
+        // 非流式错误（如 500），读取 JSON 错误信息
+        const errData = await res.json().catch(() => ({}));
+        throw new Error(errData?.error || `服务器返回错误 ${res.status}`);
       }
-      if (response.data?.html) {
-        setReportHtml(response.data.html);
-        setHasGenerated(true);
-        sessionStorage.setItem('generatedReport', response.data.html);
-        sessionStorage.setItem('reportStyle', styleToUse);
-        sessionStorage.setItem('reportFormat', formatToUse);
-        sessionStorage.setItem('reportFeedback', userFeedback);
-        console.log('✅ 报告生成成功');
-      } else {
-        throw new Error('API返回数据格式错误');
+
+      if (!res.body) throw new Error('服务器未返回响应流');
+
+      const reader = res.body.getReader();
+      const decoder = new TextDecoder();
+      let accumulated = '';
+
+      while (true) {
+        const { done, value } = await reader.read();
+        if (done) break;
+        accumulated += decoder.decode(value, { stream: true });
       }
+
+      // 清理 markdown 代码块标记
+      let htmlReport = accumulated.replace(/```html\n?/g, '').replace(/```\n?/g, '').trim();
+
+      // 补全基本 HTML 结构（如有缺失）
+      if (!htmlReport.includes('<!DOCTYPE html>') && !htmlReport.includes('<html')) {
+        htmlReport = `<!DOCTYPE html><html lang="zh-CN"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0"><title>设计报告</title></head><body>${htmlReport}</body></html>`;
+      }
+
+      if (!htmlReport || htmlReport.length < 100) {
+        throw new Error('生成的报告内容为空，请重试');
+      }
+
+      setReportHtml(htmlReport);
+      setHasGenerated(true);
+      sessionStorage.setItem('generatedReport', htmlReport);
+      sessionStorage.setItem('reportStyle', styleToUse);
+      sessionStorage.setItem('reportFormat', formatToUse);
+      sessionStorage.setItem('reportFeedback', userFeedback);
+      console.log('✅ 报告生成成功，HTML长度:', htmlReport.length);
+
     } catch (error: any) {
       console.error('❌ 生成报告时出错:', error);
-      const msg = error?.response?.data?.error || error?.response?.data?.message || error?.message;
-      alert(t('Failed to generate report', '生成报告失败', lang) + ': ' + (msg || t('Please check API config (DEEPSEEK_API_KEY) and try again', '请检查 API 配置后重试', lang)));
+      alert(t('Failed to generate report', '生成报告失败', lang) + ': ' + (error?.message || t('Please check API config (DEEPSEEK_API_KEY) and try again', '请检查 API 配置后重试', lang)));
     } finally {
       setIsGenerating(false);
     }
