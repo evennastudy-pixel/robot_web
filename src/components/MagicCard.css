@@ -1,0 +1,112 @@
+:root {
+  --purple-primary: rgba(81, 87, 232, 1);
+  --purple-glow: rgba(81, 87, 232, 0.3);
+  --purple-border: rgba(81, 87, 232, 0.8);
+  --white-glow: rgba(255, 255, 255, 0.3);
+}
+
+.magic-card {
+  position: relative;
+  overflow: hidden;
+  will-change: transform;
+  
+  --glow-x: 50%;
+  --glow-y: 50%;
+  --glow-intensity: 0;
+  --glow-radius: 300px;
+  --glow-color: 81, 87, 232;
+  --purple-glow: rgba(81, 87, 232, 0.3);
+}
+
+.magic-card:hover {
+  box-shadow:
+    0 8px 30px rgba(0, 0, 0, 0.3),
+    0 0 40px rgba(255, 255, 255, 0.15);
+}
+
+/* Border glow effect - follows mouse globally */
+.magic-card--border-glow::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  padding: 2px;
+  background: radial-gradient(
+    var(--glow-radius) circle at var(--glow-x) var(--glow-y),
+    rgba(var(--glow-color), calc(var(--glow-intensity) * 0.8)) 0%,
+    rgba(var(--glow-color), calc(var(--glow-intensity) * 0.4)) 30%,
+    transparent 60%
+  );
+  border-radius: inherit;
+  mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  mask-composite: exclude;
+  -webkit-mask:
+    linear-gradient(#fff 0 0) content-box,
+    linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  pointer-events: none;
+  opacity: 1;
+  transition: opacity 0.3s ease;
+  z-index: 1;
+}
+
+.magic-card--border-glow:hover {
+  box-shadow:
+    0 4px 20px rgba(46, 24, 78, 0.4),
+    0 0 30px var(--purple-glow);
+}
+
+/* Particle styles */
+.magic-particle {
+  position: absolute;
+  width: 4px;
+  height: 4px;
+  border-radius: 50%;
+  background: rgba(var(--glow-color), 1);
+  box-shadow: 0 0 8px rgba(var(--glow-color), 0.8);
+  pointer-events: none;
+  z-index: 1;
+}
+
+.magic-particle::before {
+  content: '';
+  position: absolute;
+  top: -2px;
+  left: -2px;
+  right: -2px;
+  bottom: -2px;
+  background: rgba(var(--glow-color), 0.3);
+  border-radius: 50%;
+  z-index: -1;
+}
+
+/* Global spotlight */
+.magic-spotlight {
+  position: fixed;
+  width: 800px;
+  height: 800px;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle,
+    rgba(var(--glow-color), 0.2) 0%,
+    rgba(var(--glow-color), 0.12) 15%,
+    rgba(var(--glow-color), 0.06) 30%,
+    rgba(var(--glow-color), 0.03) 45%,
+    transparent 60%
+  );
+  z-index: 200;
+  opacity: 0;
+  transform: translate(-50%, -50%);
+  mix-blend-mode: screen;
+  will-change: transform, opacity;
+}
+
+/* Ripple effect */
+.magic-ripple {
+  position: absolute;
+  border-radius: 50%;
+  pointer-events: none;
+  z-index: 3;
+}
+
