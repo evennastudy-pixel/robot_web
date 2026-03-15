@@ -123,32 +123,14 @@ ${userFeedback}
 
     // 报告格式说明：report=详细报告含结构图，ppt=分页演示稿
     const formatInstructions = format === 'ppt' ? (isEnglish ? `
-4. **PPT/Slide Format**:
-   - Organize content into distinct slides (each section = one slide)
-   - Each slide: clear title, concise bullet points, visual hierarchy
-   - Add slide numbers and navigation cues
-   - Use full-width sections with clear boundaries
-   - Design like a professional presentation deck` : `
-4. **PPT/幻灯片格式**：
-   - 按幻灯片分页组织内容（每个小节=一页）
-   - 每页：清晰标题、简洁要点、视觉层次分明
-   - 添加页码与导航提示
-   - 使用全宽区块、边界清晰
-   - 呈现专业演示稿效果`) : (isEnglish ? `
-4. **Structure Diagrams**:
-   - Include at least 1-2 structure diagrams (use inline SVG or CSS)
-   - E.g.: system architecture diagram, design process flow, concept relationship diagram
-   - Diagrams should be clean, readable, with labels
-   - Use boxes, arrows, and clear hierarchy` : `
-4. **结构图**：
-   - 至少包含 1-2 个结构图（使用内联 SVG 或 CSS 绘制）
-   - 例如：系统架构图、设计流程图、概念关系图
-   - 结构图需清晰可读、带标签
-   - 使用方框、箭头和层次结构`);
+4. **PPT**: One section per "slide" (full-width block), clear titles and bullets.` : `
+4. **PPT**：每小节一页，全宽区块、标题与要点清晰。`) : (isEnglish ? `
+4. **Optional**: One simple diagram (inline SVG/CSS) if space allows; otherwise skip.` : `
+4. **可选**：若篇幅允许可加一个简单结构图（内联 SVG/CSS），否则可省略。`);
 
     // 构建提示词
     const prompt = isEnglish ? 
-    `You are a professional design report writing expert. Based on the following design solution information, please generate an exquisite, professional, and highly detailed HTML format design report.
+    `You are a professional design report expert. Generate a CONCISE HTML report. You MUST output the COMPLETE HTML document in this single response (do not truncate). Keep it short so it fits.
 
 Theme Information:
 ${theme ? `Theme: ${theme.titleEn || theme.title}
@@ -174,11 +156,10 @@ Requirements:
    CSS reference (apply these or equivalent): ${styleCssHint}
    The report appearance MUST match this style. Do NOT use a different color scheme or background.
 
-1. **Content** (be structured and clear):
-   - Add a brief Table of Contents at the beginning
-   - Each section: 1-2 well-written paragraphs
-   - Cover: project overview, design insight, methods, technologies, application scenarios, impact
-   - Be professional and focused; do not pad with filler text
+1. **Content** (CONCISE - must fit in one short response):
+   - Brief table of contents, then 5-7 sections with one short paragraph each
+   - Cover: overview, insight, methods, tech, scenarios, impact
+   - No long paragraphs; keep total HTML under ~1500 words equivalent
 
 2. **HTML and Styling**:
    - Generate complete HTML document with inline CSS styles
@@ -194,9 +175,9 @@ Requirements:
    - Overall style should be professional, innovative, and futuristic${feedbackSection}
    - **Important: Generate the entire report in ENGLISH**
 
-Please generate the detailed and complete report HTML code in ENGLISH:` 
+Output the complete report HTML now (concise, full document):` 
     : 
-    `你是一位专业的设计报告撰写专家。请根据以下设计方案信息，生成一份精美、专业、内容详实的HTML格式设计报告。
+    `你是设计报告专家。请生成一份简洁的 HTML 报告。你必须在本条回复中输出完整 HTML 文档，不要截断。控制篇幅，保证一次输出完整。
 
 主题信息：
 ${theme ? `主题：${theme.title} - ${theme.titleEn}
@@ -222,11 +203,10 @@ ${theme ? `主题：${theme.title} - ${theme.titleEn}
    CSS参考（必须使用此类样式）：${styleCssHint}
    报告外观必须符合该风格。禁止使用其他配色或背景。
 
-1. **内容**（结构清晰即可）：
-   - 在开头添加简洁目录
-   - 每个章节 1-2 段专业段落
-   - 涵盖：项目概述、设计洞察、方法、技术、应用场景、影响
-   - 内容专业聚焦，不要填充废话
+1. **内容**（务必简洁，一次响应内完成）：
+   - 简短目录 + 5～7 个小节，每节一段短段落即可
+   - 涵盖：概述、洞察、方法、技术、场景、影响
+   - 不要长段落，整份报告相当于约 1000 字以内
 
 2. **HTML与样式**：
    - 生成完整的HTML文档，包含内联CSS样式
@@ -242,7 +222,7 @@ ${theme ? `主题：${theme.title} - ${theme.titleEn}
    - 整体风格应该专业、创新、富有未来感${feedbackSection}
    - **重要：生成的报告必须使用中文**
 
-请生成详细完善的中文报告HTML代码：`;
+请直接输出完整的中文报告 HTML 代码（简洁、勿截断）：`;
 
     console.log('🎨 开始生成方案报告...');
 
@@ -260,7 +240,7 @@ ${theme ? `主题：${theme.title} - ${theme.titleEn}
         { role: 'user', content: prompt }
       ],
       temperature: 0.5,
-      max_tokens: 4000,
+      max_tokens: 2048,
       stream: true,
     });
 
