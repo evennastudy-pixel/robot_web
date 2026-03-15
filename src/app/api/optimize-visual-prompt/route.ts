@@ -1,11 +1,12 @@
 import { NextRequest, NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// 初始化 DeepSeek 客户端
-const deepseek = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
-});
+function getDeepseek() {
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY || 'placeholder',
+    baseURL: 'https://api.deepseek.com',
+  });
+}
 
 // 检测文本主要语言（中文或英文）
 function detectLanguage(text: string): 'zh' | 'en' {
@@ -122,6 +123,7 @@ Please directly output the optimized English prompt with all text elements in En
 请直接输出优化后的中文提示词，图片中所有文字元素都用中文。`;
     
     // 调用 DeepSeek API
+    const deepseek = getDeepseek();
     const response = await deepseek.chat.completions.create({
       model: 'deepseek-chat',
       messages: [

@@ -1,13 +1,14 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-// 初始化 DeepSeek 客户端（使用 OpenAI SDK，因为 API 兼容）
-const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
-  timeout: 15000, // 减少超时时间到15秒
-  maxRetries: 1   // 减少重试次数
-});
+function getOpenAI() {
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY || 'placeholder',
+    baseURL: 'https://api.deepseek.com',
+    timeout: 15000,
+    maxRetries: 1
+  });
+}
 
 // 确保这里使用 POST 方法
 export async function POST(req: Request) {

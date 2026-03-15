@@ -79,13 +79,14 @@ const llm = new ChatOpenAI({
   streaming: true
 });
 
-// 备用 DeepSeek 客户端 - 直接使用 OpenAI SDK（因为 API 兼容）
-const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
-  timeout: 60000,
-  maxRetries: 3
-});
+function getOpenAI() {
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY || 'placeholder',
+    baseURL: 'https://api.deepseek.com',
+    timeout: 60000,
+    maxRetries: 3
+  });
+}
 
 // Agent回复生成函数 - 考虑其他Agent的观点
 async function generateAgentResponse(

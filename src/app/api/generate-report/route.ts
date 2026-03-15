@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const client = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
-});
+function getClient() {
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY || 'placeholder',
+    baseURL: 'https://api.deepseek.com',
+  });
+}
 
 // 检测文本主要语言（中文或英文）
 function detectLanguage(text: string): 'zh' | 'en' {
@@ -255,6 +257,7 @@ ${theme ? `主题：${theme.title} - ${theme.titleEn}
       `You are a professional design report writing expert. CRITICAL: You MUST strictly follow the visual style requested by the user. Each style has distinct colors, backgrounds, and aesthetics - the output MUST look different when the user selects a different style. Apply the exact CSS/colors specified in the user message. Generate all content in ENGLISH.` :
       `你是一位专业的设计报告撰写专家。重要：你必须严格按用户选择的视觉风格生成报告。不同风格对应不同的配色、背景和美学，切换风格时报告外观必须明显不同。按用户消息中的具体CSS/配色要求执行。生成的所有内容必须使用中文。`;
 
+    const client = getClient();
     const completion = await client.chat.completions.create({
       model: 'deepseek-chat',
       messages: [

@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
-  timeout: 60000,
-  maxRetries: 3
-});
+function getOpenAI() {
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY || 'placeholder',
+    baseURL: 'https://api.deepseek.com',
+    timeout: 60000,
+    maxRetries: 3
+  });
+}
 
 export async function POST(req: Request) {
   try {
@@ -39,6 +41,7 @@ export async function POST(req: Request) {
     5. 要求使用英文，注意内容不要太长，300字以内
     `;
 
+    const openai = getOpenAI();
     const completion = await openai.chat.completions.create({
       messages: [{ role: "user", content: prompt }],
       model: "deepseek-chat",

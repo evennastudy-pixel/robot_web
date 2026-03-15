@@ -1,12 +1,14 @@
 import { NextResponse } from 'next/server';
 import OpenAI from 'openai';
 
-const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
-  timeout: 60000,
-  maxRetries: 3
-});
+function getOpenAI() {
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY || 'placeholder',
+    baseURL: 'https://api.deepseek.com',
+    timeout: 60000,
+    maxRetries: 3
+  });
+}
 
 export async function POST(req: Request) {
   let futureSignal: any = null;

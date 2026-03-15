@@ -138,13 +138,14 @@ function selectExperts(userMessage: string, conversationHistory: any[]): string[
   return expertsArray.slice(0, 3);
 }
 
-// 初始化 DeepSeek 客户端
-const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
-  timeout: 60000,
-  maxRetries: 3
-});
+function getOpenAI() {
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY || 'placeholder',
+    baseURL: 'https://api.deepseek.com',
+    timeout: 60000,
+    maxRetries: 3
+  });
+}
 
 // 生成专家回复
 async function generateExpertResponse(
@@ -209,6 +210,7 @@ async function generateExpertResponse(
   
   try {
     // 第一步：生成回复（减少max_tokens加快响应）
+    const openai = getOpenAI();
     const response = await openai.chat.completions.create({
       model: 'deepseek-chat',
       messages: messages,
@@ -266,7 +268,8 @@ ${content}
 3. 如果已有项目接近限制，只提取相关度更高的新内容`;
 
     try {
-      const extractionResponse = await openai.chat.completions.create({
+      const openaiForExtraction = getOpenAI();
+      const extractionResponse = await openaiForExtraction.chat.completions.create({
         model: 'deepseek-chat',
         messages: [{ role: 'user', content: extractionPrompt }],
         temperature: 0.3,

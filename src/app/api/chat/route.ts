@@ -2,20 +2,22 @@ import OpenAI from 'openai';
 import { NextResponse } from 'next/server';
 import type { ChatCompletionMessageParam } from 'openai/resources';
 
-// 创建 DeepSeek 客户端实例（使用 OpenAI SDK，因为 API 兼容）
-const openai = new OpenAI({
-  apiKey: process.env.DEEPSEEK_API_KEY,
-  baseURL: 'https://api.deepseek.com',
-  timeout: 60000, // 设置60秒超时
-  maxRetries: 3,  // 最大重试次数
-});
+// 懒加载客户端，避免构建时因环境变量缺失报错
+function getClient() {
+  return new OpenAI({
+    apiKey: process.env.DEEPSEEK_API_KEY || 'placeholder',
+    baseURL: 'https://api.deepseek.com',
+    timeout: 60000,
+    maxRetries: 3,
+  });
+}
 
 export async function POST(request: Request) {
   console.log('API路由被调用');
   
   try {
     // 检查API密钥
-    if (!process.env.DEEPSEEK_API_KEY && !openai.apiKey) {
+    if (!process.env.DEEPSEEK_API_KEY) {
       console.error('API密钥未设置');
       return new NextResponse(
         JSON.stringify({ error: 'DeepSeek API密钥未配置' }),
@@ -97,7 +99,8 @@ export async function POST(request: Request) {
       
       while (retries > 0) {
         try {
-          const completion = await openai.chat.completions.create({
+          const openai = getClient();
+      const completion = await openai.chat.completions.create({
             messages,
             model: "deepseek-chat",
             temperature: 0.7,
