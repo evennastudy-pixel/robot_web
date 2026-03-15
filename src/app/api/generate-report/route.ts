@@ -174,16 +174,11 @@ Requirements:
    CSS reference (apply these or equivalent): ${styleCssHint}
    The report appearance MUST match this style. Do NOT use a different color scheme or background.
 
-1. **Content Expansion and Enhancement** (IMPORTANT - make report very detailed):
-   - Expand brief descriptions into rich, well-structured paragraphs (2-4 paragraphs per section)
-   - Add a Table of Contents at the beginning
-   - Add logically coherent transition paragraphs between sections
-   - For technology: explain choices, advantages, implementation approach, integration
-   - For application scenarios: describe 2-3 specific use cases with user journey
-   - For design methods: explain application, rationale, and outcomes for each
-   - For core concepts: define, relate, and show how they connect
-   - Include summary/ takeaways sections where appropriate
-   - Target: comprehensive report of 3000+ words equivalent in content density
+1. **Content** (be structured and clear):
+   - Add a brief Table of Contents at the beginning
+   - Each section: 1-2 well-written paragraphs
+   - Cover: project overview, design insight, methods, technologies, application scenarios, impact
+   - Be professional and focused; do not pad with filler text
 
 2. **HTML and Styling**:
    - Generate complete HTML document with inline CSS styles
@@ -227,16 +222,11 @@ ${theme ? `主题：${theme.title} - ${theme.titleEn}
    CSS参考（必须使用此类样式）：${styleCssHint}
    报告外观必须符合该风格。禁止使用其他配色或背景。
 
-1. **内容补充与完善**（重要 - 报告需非常详实）：
-   - 将简短描述扩展为结构完整、内容丰富的段落（每小节 2-4 段）
-   - 在开头添加目录
-   - 各章节之间添加逻辑连贯的过渡段落
-   - 技术实现：说明选型理由、优势、实现路径、集成方式
-   - 应用场景：描述 2-3 个具体用例及用户旅程
-   - 设计方法：说明每种方法的应用方式、依据与成果
-   - 核心概念：定义、关联并展示概念间的联系
-   - 适当添加总结/要点回顾
-   - 目标：内容密度相当于 3000+ 字的完整报告
+1. **内容**（结构清晰即可）：
+   - 在开头添加简洁目录
+   - 每个章节 1-2 段专业段落
+   - 涵盖：项目概述、设计洞察、方法、技术、应用场景、影响
+   - 内容专业聚焦，不要填充废话
 
 2. **HTML与样式**：
    - 生成完整的HTML文档，包含内联CSS样式
@@ -270,7 +260,7 @@ ${theme ? `主题：${theme.title} - ${theme.titleEn}
         { role: 'user', content: prompt }
       ],
       temperature: 0.5,
-      max_tokens: 8192,
+      max_tokens: 4000,
       stream: true,
     });
 

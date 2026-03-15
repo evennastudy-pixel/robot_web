@@ -123,7 +123,11 @@ export default function SolutionReviewPage() {
 
       while (true) {
         const { done, value } = await reader.read();
-        if (done) break;
+        if (done) {
+          // flush 解码器中残留的字节
+          accumulated += decoder.decode();
+          break;
+        }
         accumulated += decoder.decode(value, { stream: true });
       }
 
@@ -234,10 +238,11 @@ export default function SolutionReviewPage() {
               </div>
             ) : reportHtml ? (
               <iframe
+                key={reportHtml.slice(0, 100)}
                 srcDoc={reportHtml}
                 className="w-full h-full border-0"
                 title="Solution Report"
-                sandbox="allow-same-origin"
+                sandbox="allow-same-origin allow-scripts allow-popups"
               />
             ) : !solution ? (
               <div className="flex flex-col items-center justify-center h-full text-gray-500 p-6">
