@@ -533,7 +533,11 @@ export default function VisualAssetsPage() {
                   <textarea
                     value={userPrompt}
                     onChange={(e) => setUserPrompt(e.target.value)}
-                    placeholder={t('e.g., Show the scene of using this product in a space station, with floating tools and materials', '例如：展示在太空站中使用该产品的场景，漂浮的工具和材料', lang)}
+                    placeholder={t(
+                      'e.g., A service robot helping an elderly person in a living room, warm lighting, clear interaction, realistic style',
+                      '例如：客厅里服务机器人陪伴老人，温暖灯光、清晰的人机互动、真实写实风格',
+                      lang
+                    )}
                     className="w-full p-3 border border-gray-600 bg-gray-900/30 text-white placeholder-gray-500 rounded-lg h-20 resize-none focus:ring-2 focus:ring-[#5157E8] focus:border-[#5157E8]"
                   />
                 </div>
