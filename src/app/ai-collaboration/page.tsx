@@ -108,11 +108,7 @@ export default function AICollaborationPage() {
   ];
   
   // 快捷问题模板
-  const QUICK_PROMPTS = [
-    { id: 1, text: t("How to improve the project description?", "如何完善项目描述？", lang), icon: "📝" },
-    { id: 2, text: t("What are some reference cases?", "有什么参考案例？", lang), icon: "💡" },
-    { id: 3, text: t("What technical support is needed?", "需要哪些技术支持？", lang), icon: "🔧" },
-  ];
+  const QUICK_PROMPTS: { id: number; text: string; icon: string }[] = [];
   
   const steps = [
     { id: 1, label: t('Theme Selection', '主题选择', lang), path: '/theme-selection', completed: true },
@@ -236,20 +232,20 @@ export default function AICollaborationPage() {
           sessionStorage.removeItem('solutionConversation');
         }
       } else if (savedTheme && !savedConversation) {
-        // 如果有主题但没有对话历史，显示欢迎消息
+        // 如果有主题但没有对话历史，显示「设计思维五步」引导性欢迎消息
         const theme = JSON.parse(savedTheme);
         setTimeout(() => {
           const themeTitle = lang === 'zh' ? theme.title : theme.titleEn;
           const welcomeMessage = {
             role: 'assistant' as const,
             content: lang === 'zh' 
-              ? `你好！我是你的设计协作团队。我看到你选择了「${themeTitle}」这个主题。\n\n让我们一起设计一个完整的方案吧！你可以：\n- 从项目名称开始\n- 描述你的初步想法\n- 或者直接提问\n\n我会根据话题自动调度合适的专家来回答你。`
-              : `Hello! I'm your design collaboration team. I see you've chosen the theme "${themeTitle}".\n\nLet's design a complete solution together! You can:\n- Start with a project name\n- Describe your initial ideas\n- Or ask questions directly\n\nI will automatically dispatch appropriate experts to answer based on the topic.`,
+              ? `你好！这里是你的 AI 设计协作团队。\n\n我们会按照「设计思维五步法」来一步步引导你构思方案：\n1）共情：先把用户、场景和痛点说清楚\n2）定义：一起收敛成一个聚焦的问题\n3）发想：帮你发散出多种机器人方案思路\n4）原型：把其中 1～2 个想法具体化\n5）测试：一起想想如何在真实场景里小规模试一试\n\n当前主题是「${themeTitle}」。\n请从第一个问题开始回答：\n👉 你的目标用户是谁？他们在什么典型场景下面对什么样的困扰或需求？\n\n你只需要在下面输入框里，用自己的话回答，每次就回答当前问题即可。后面的问题会由专家来继续引导。`
+              : `Hi! This is your AI design collaboration team.\n\nWe will guide you through the 5 steps of Design Thinking:\n1) Empathize – clarify users, context and pain points\n2) Define – focus on one concrete problem\n3) Ideate – generate multiple robot solution ideas\n4) Prototype – make 1–2 ideas concrete\n5) Test – think about how to test in real contexts\n\nYour current theme is "${themeTitle}".\nPlease start with this first question:\n👉 Who are your target users, and in what typical situations do they face which problems or needs?\n\nJust answer the current question in the input box below; the experts will then ask you the next one.`,
             agentId: 'design-critic',
             agentName: lang === 'zh' ? '设计评论家' : 'Design Critic'
           };
           setChatHistory([welcomeMessage]);
-          console.log('✅ 显示欢迎消息');
+          console.log('✅ 显示设计思维引导欢迎消息');
         }, 500);
       }
       
@@ -883,7 +879,11 @@ export default function AICollaborationPage() {
           <div className="flex-none p-6 border-b border-gray-700/50">
             <h3 className="text-lg font-bold text-[#5157E8]">{t('AI Collaboration Team', 'AI 协作团队', lang)}</h3>
             <div className="text-sm text-gray-600 mt-1">
-              {t('The system will automatically dispatch appropriate experts based on your questions', '系统会根据你的问题自动调度合适的专家回答', lang)}
+              {t(
+                'Experts will guide you through the 5 steps of design thinking. Just answer their questions step by step.',
+                'AI 专家会按照「设计思维五步法」主动发问，你只需要逐条回答即可。',
+                lang
+              )}
             </div>
           </div>
 
@@ -982,23 +982,18 @@ export default function AICollaborationPage() {
           <div className="flex-none p-6 border-t border-gray-200 space-y-3">
             {/* 快捷问题 */}
             <div className="flex flex-wrap gap-2">
-              {QUICK_PROMPTS.map(prompt => (
-                <button
-                  key={prompt.id}
-                  onClick={() => useQuickPrompt(prompt.text)}
-                  className="px-3 py-1.5 text-sm bg-gray-800/50 hover:bg-gray-700/50 border border-gray-700 text-gray-300 hover:text-white rounded-full transition-colors flex items-center gap-1"
-                >
-                  <span>{prompt.icon}</span>
-                  <span>{prompt.text}</span>
-                </button>
-              ))}
+              {/* 引导式对话模式下，不再展示快捷提问按钮 */}
             </div>
 
             {/* 输入框 */}
             <div className="flex gap-2">
               <input
                 type="text"
-                placeholder={t('Enter your question or idea...', '输入你的问题或想法...', lang)}
+                placeholder={t(
+                  'Answer the current question from the experts...',
+                  '在这里回答专家刚才的问题...',
+                  lang
+                )}
                 className="flex-1 p-3 border border-gray-600 bg-gray-900/30 text-white placeholder-gray-500 rounded-lg focus:ring-2 focus:ring-[#5157E8] focus:border-[#5157E8]"
                 value={chatInput}
                 onChange={(e) => setChatInput(e.target.value)}

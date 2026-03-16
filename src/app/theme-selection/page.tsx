@@ -5,6 +5,7 @@ import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import WorkshopNavigation from '@/components/WorkshopNavigation';
 import { useLanguage, t } from '@/hooks/useLanguage';
+import axios from 'axios';
 
 // 主题数据接口（与原来的FutureSignal结构保持一致）
 interface ThemeData {
@@ -30,96 +31,11 @@ interface ThemeData {
   isCustom?: boolean; // 是否为自定义议题
 }
 
-// 4个太空设计主题 + 5个机器人设计主题 + 1个自定义
+// 机器人设计主题 + 自定义议题
 const THEMES_DATA: ThemeData[] = [
   {
     id: 1,
     sign: "Theme 1",
-    title: "具身体验与交互设计",
-    titleEn: "Embodied Experience & Interaction Design",
-    summary: "当身体的熟悉性失效，如何通过结构化的符号行为重新建立人与世界的连接？",
-    summaryEn: "When bodily familiarity fails, how can we re-establish connections between humans and the world through structured symbolic behaviors?",
-    coreQuestion: "当身体的熟悉性失效，如何通过结构化的符号行为重新建立人与世界的连接？",
-    coreQuestionEn: "When bodily familiarity fails, how can we re-establish connections between humans and the world through structured symbolic behaviors?",
-    intro: "在失重环境中，人类身体的基本感知和互动模式都会失效。这个主题探索如何通过创新的交互设计，重新建立人与太空环境的连接。",
-    introEn: "In a zero-gravity environment, basic human bodily perception and interaction patterns become ineffective. This theme explores how to re-establish connections between humans and space environments through innovative interaction design.",
-    introQuote: "关注「具身体验」「感官重构」「AI 交互」等方向",
-    introQuoteEn: "Focus on 'Embodied Experience', 'Sensory Reconstruction', 'AI Interaction' and other directions",
-    detail: "设计方向：\n• 失重环境下的身体动作重构\n• 新型交互界面设计\n• 感官替代系统\n\n关键词：具身体验 Embodiment、感官重构 Sensory Reconstruction、AI 交互 AI Interaction、零重力适应 Zero-Gravity Adaptation\n\n参考案例：MIT Space/Craft 项目 - 零重力环境下的热熔胶3D绘画艺术创作",
-    thumbnail: "/images/future-signals/1.png",
-    detailImage: "/images/future-signals/5.png",
-    keywords: ["具身体验", "感官重构", "AI 交互", "零重力适应"],
-    keywordsEn: ["Embodiment", "Sensory Reconstruction", "AI Interaction", "Zero-Gravity Adaptation"],
-    designDirections: ["失重环境下的身体动作重构", "新型交互界面设计", "感官替代系统"],
-    designDirectionsEn: ["Body Movement Reconstruction in Zero Gravity", "Novel Interface Design", "Sensory Substitution Systems"]
-  },
-  {
-    id: 2,
-    sign: "Theme 2",
-    title: "文化结构与仪式演化",
-    titleEn: "Cultural Structure & Ritual Evolution",
-    summary: "如何将地球文明的仪式结构与情感代码延伸到太空文明中？",
-    summaryEn: "How can we extend the ritual structures and emotional codes of Earth civilization into space civilization?",
-    coreQuestion: "如何将地球文明的仪式结构与情感代码延伸到太空文明中？",
-    coreQuestionEn: "How can we extend the ritual structures and emotional codes of Earth civilization into space civilization?",
-    intro: "人类文明的延续离不开仪式和文化。这个主题探讨如何将地球上的文化结构、情感表达和仪式行为转译到太空环境中。",
-    introEn: "The continuation of human civilization cannot exist without rituals and culture. This theme explores how to translate cultural structures, emotional expressions, and ritual behaviors from Earth into space environments.",
-    introQuote: "关注「仪式化设计」「文化结构」「数字信仰」「群体情感」方向",
-    introQuoteEn: "Focus on 'Ritual Design', 'Cultural Structure', 'Digital Faith', 'Collective Emotion' directions",
-    detail: "设计方向：\n• 太空仪式空间设计\n• 数字化纪念系统\n• 文化传承机制\n\n关键词：仪式化设计 Ritual Design、文化结构 Cultural Structure、数字信仰 Digital Faith、群体情感 Collective Emotion\n\n参考案例：国际空间站节日庆祝活动设计",
-    thumbnail: "/images/future-signals/2.png",
-    detailImage: "/images/future-signals/6.png",
-    keywords: ["仪式化设计", "文化结构", "数字信仰", "群体情感"],
-    keywordsEn: ["Ritual Design", "Cultural Structure", "Digital Faith", "Collective Emotion"],
-    designDirections: ["太空仪式空间设计", "数字化纪念系统", "文化传承机制"],
-    designDirectionsEn: ["Space Ritual Space Design", "Digital Memorial Systems", "Cultural Heritage Mechanisms"]
-  },
-  {
-    id: 3,
-    sign: "Theme 3",
-    title: "时间重构与情感连接",
-    titleEn: "Temporal Reconstruction & Emotional Connection",
-    summary: "当昼夜节律与季节变化失效，如何通过设计重建情感、记忆与仪式？",
-    summaryEn: "When circadian rhythms and seasonal changes fail, how can we rebuild emotions, memories, and rituals through design?",
-    coreQuestion: "当昼夜节律与季节变化失效，如何通过设计重建情感、记忆与仪式？",
-    coreQuestionEn: "When circadian rhythms and seasonal changes fail, how can we rebuild emotions, memories, and rituals through design?",
-    intro: "在太空中，自然的时间标记如日出日落、四季变化都不复存在。这个主题探索如何通过设计重建时间感知，维持人类的生物节律。",
-    introEn: "In space, natural time markers such as sunrise and sunset, seasonal changes no longer exist. This theme explores how to rebuild time perception through design and maintain human biological rhythms.",
-    introQuote: "关注「时间感知」「情感交互」「数字纪念」方向",
-    introQuoteEn: "Focus on 'Temporal Perception', 'Emotional Interaction', 'Digital Memorial' directions",
-    detail: "设计方向：\n• 人造昼夜系统\n• 情感时间标记\n• 记忆可视化\n\n关键词：时间感知 Temporal Perception、情感交互 Emotional Interaction、数字纪念 Digital Memorial、生物节律 Circadian Rhythm\n\n参考案例：NASA 火星任务的昼夜节律调节系统",
-    thumbnail: "/images/future-signals/3.png",
-    detailImage: "/images/future-signals/7.png",
-    keywords: ["时间感知", "情感交互", "数字纪念", "生物节律"],
-    keywordsEn: ["Temporal Perception", "Emotional Interaction", "Digital Memorial", "Circadian Rhythm"],
-    designDirections: ["人造昼夜系统", "情感时间标记", "记忆可视化"],
-    designDirectionsEn: ["Artificial Day-Night Systems", "Emotional Time Markers", "Memory Visualization"]
-  },
-  {
-    id: 4,
-    sign: "Theme 4",
-    title: "非地理性共享空间",
-    titleEn: "Non-Geographical Shared Space",
-    summary: "空间失去地理意义时，如何建立「公共感」与「共识」？",
-    summaryEn: "When space loses geographical meaning, how can we establish a sense of 'publicness' and 'consensus'?",
-    coreQuestion: "空间失去地理意义时，如何建立「公共感」与「共识」？",
-    coreQuestionEn: "When space loses geographical meaning, how can we establish a sense of 'publicness' and 'consensus'?",
-    intro: "在太空中，传统的地理概念和公共空间定义都会改变。这个主题探讨如何在没有固定地理参照的环境中，通过设计创造新的公共感。",
-    introEn: "In space, traditional geographical concepts and definitions of public space change. This theme explores how to create new sense of publicness through design in environments without fixed geographical references.",
-    introQuote: "关注「虚拟空间」「数字社交」「共感系统」「共享记忆」等方向",
-    introQuoteEn: "Focus on 'Virtual Space', 'Digital Social', 'Empathy System', 'Shared Memory' and other directions",
-    detail: "设计方向：\n• 虚拟公共空间\n• 远程共在系统\n• 群体体验设计\n\n关键词：虚拟空间 Virtual Space、数字社交 Digital Social、共感系统 Empathy System、共享记忆 Shared Memory\n\n参考案例：VR 技术在国际空间站的社交应用",
-    thumbnail: "/images/future-signals/4.png",
-    detailImage: "/images/future-signals/8.png",
-    keywords: ["虚拟空间", "数字社交", "共感系统", "共享记忆"],
-    keywordsEn: ["Virtual Space", "Digital Social", "Empathy System", "Shared Memory"],
-    designDirections: ["虚拟公共空间", "远程共在系统", "群体体验设计"],
-    designDirectionsEn: ["Virtual Public Spaces", "Remote Co-presence Systems", "Group Experience Design"]
-  },
-  // 5个机器人设计主题（现实落地方向）
-  {
-    id: 5,
-    sign: "Theme 5",
     title: "服务机器人人机交互设计",
     titleEn: "Service Robot Human-Computer Interaction Design",
     summary: "如何在日常生活场景中设计自然、高效的服务机器人交互体验？",
@@ -139,8 +55,8 @@ const THEMES_DATA: ThemeData[] = [
     designDirectionsEn: ["Multimodal Natural Language Interaction", "Visual Task Flow Guidance", "Emotional Feedback & Status Display", "Age-friendly & Accessible Design"]
   },
   {
-    id: 6,
-    sign: "Theme 6",
+    id: 2,
+    sign: "Theme 2",
     title: "工业协作机器人安全与效率",
     titleEn: "Industrial Collaborative Robot Safety & Efficiency",
     summary: "如何平衡人机协作中的安全性与生产效率？",
@@ -160,8 +76,8 @@ const THEMES_DATA: ThemeData[] = [
     designDirectionsEn: ["Safety Zone Visualization & Alert", "Task Allocation & Workflow Optimization", "Interface Simplification & Cognitive Reduction", "Digital Twin Simulation & Training"]
   },
   {
-    id: 7,
-    sign: "Theme 7",
+    id: 3,
+    sign: "Theme 3",
     title: "医疗康复机器人体验设计",
     titleEn: "Medical Rehabilitation Robot Experience Design",
     summary: "如何设计兼具疗效与人文关怀的康复机器人体验？",
@@ -181,8 +97,8 @@ const THEMES_DATA: ThemeData[] = [
     designDirectionsEn: ["Gamified Rehabilitation Training", "Progress & Efficacy Visualization", "Emotional Companion & Motivation", "Home Scenario Adaptation & Remote Monitoring"]
   },
   {
-    id: 8,
-    sign: "Theme 8",
+    id: 4,
+    sign: "Theme 4",
     title: "教育陪伴机器人情感设计",
     titleEn: "Educational Companion Robot Emotional Design",
     summary: "如何设计能建立信任与情感连接的儿童教育机器人？",
@@ -202,8 +118,8 @@ const THEMES_DATA: ThemeData[] = [
     designDirectionsEn: ["Anthropomorphic Appearance & Expression", "Trust Building & Emotional Response", "Gamified Learning & Motivation", "Children's Privacy & Ethical Boundaries"]
   },
   {
-    id: 9,
-    sign: "Theme 9",
+    id: 5,
+    sign: "Theme 5",
     title: "智能家居机器人场景设计",
     titleEn: "Smart Home Robot Scenario Design",
     summary: "如何设计无缝融入家庭生活的智能机器人服务场景？",
@@ -223,8 +139,8 @@ const THEMES_DATA: ThemeData[] = [
     designDirectionsEn: ["Home Scenario Sensing & Adaptation", "Multi-device Collaboration & Unified Control", "Privacy Protection & Data Transparency", "Balance of Passive & Active Service"]
   },
   {
-    id: 10,
-    sign: "Theme 10",
+    id: 6,
+    sign: "Theme 6",
     title: "农业机器人精准作业设计",
     titleEn: "Agricultural Robot Precision Operation Design",
     summary: "如何在复杂田间环境中设计高效、精准的农业机器人作业系统？",
@@ -244,8 +160,8 @@ const THEMES_DATA: ThemeData[] = [
     designDirectionsEn: ["Path Planning & Obstacle Avoidance in Unstructured Terrain", "Crop Recognition & Precision Operation", "Balance of Quality & Efficiency", "Multi-robot Coordination & Scheduling"]
   },
   {
-    id: 11,
-    sign: "Theme 11",
+    id: 7,
+    sign: "Theme 7",
     title: "物流仓储机器人协作效率",
     titleEn: "Logistics & Warehouse Robot Collaboration Efficiency",
     summary: "如何设计高密度仓储场景下的机器人调度与协作系统？",
@@ -263,6 +179,37 @@ const THEMES_DATA: ThemeData[] = [
     keywordsEn: ["Scheduling Algorithm", "Path Optimization", "Human-Robot Coordination", "Order Fulfillment"],
     designDirections: ["动态调度与任务分配算法", "高密度环境路径避碰优化", "人机混合作业区安全设计", "订单履约时效与准确率平衡"],
     designDirectionsEn: ["Dynamic Scheduling & Task Allocation", "Path & Collision Avoidance in Dense Environments", "Human-Robot Mixed Zone Safety Design", "Balance of Fulfillment Speed & Accuracy"]
+  },
+  {
+    id: 8,
+    sign: "Theme 8",
+    title: "城市公共服务机器人系统",
+    titleEn: "Urban Public Service Robot Systems",
+    summary: "如何在城市公共空间中设计协同工作的服务机器人体系？",
+    summaryEn: "How to design a coordinated system of service robots in urban public spaces?",
+    coreQuestion: "如何在城市公共空间中，让多种服务机器人协同工作，同时兼顾安全、效率与市民体验？",
+    coreQuestionEn: "How can multiple service robots work together in urban public spaces while balancing safety, efficiency, and citizen experience?",
+    intro: "在商场、地铁站、医院大厅、政务服务中心等公共空间中，清洁、引导、巡逻、咨询等功能型机器人正在逐步出现。本主题聚焦于从“单个设备”走向“城市级机器人系统”，思考如何设计统一的体验和协作机制。",
+    introEn: "In public spaces such as malls, subway stations, hospital lobbies and government service centers, functional robots for cleaning, guidance, patrolling and information are emerging. This theme focuses on moving from individual devices to an \"urban-scale robot system\" with unified experience and collaboration mechanisms.",
+    introQuote: "关注「多角色协同」「公共安全」「无障碍导航」「多终端一体化体验」等方向",
+    introQuoteEn: "Focus on 'Multi-role Collaboration', 'Public Safety', 'Accessible Navigation', 'Multi-terminal Integrated Experience' and other directions",
+    detail: "设计方向：\n• 商场 / 地铁 / 医院场景中的多机器人角色分工与协同\n• 面向老人、儿童、残障人士的无障碍导航与引导体验\n• 与城市摄像头、传感器、信息屏的联动设计\n• 公共安全与隐私保护边界的交互呈现\n\n关键词：多角色协同 Multi-role Collaboration、公共服务 Public Service、无障碍导航 Accessible Navigation、城市物联网 Urban IoT",
+    thumbnail: "/images/future-signals/4.png",
+    detailImage: "/images/future-signals/8.png",
+    keywords: ["多角色协同", "公共服务", "无障碍导航", "城市物联网"],
+    keywordsEn: ["Multi-role Collaboration", "Public Service", "Accessible Navigation", "Urban IoT"],
+    designDirections: [
+      "商场 / 地铁 / 医院一体化公共服务机器人系统",
+      "面向特殊人群的无障碍导航与陪伴机器人",
+      "与城市物联网设施联动的实时信息服务",
+      "公共空间中机器人行为规范与安全反馈设计"
+    ],
+    designDirectionsEn: [
+      "Integrated public service robot systems for malls / metro / hospitals",
+      "Accessible navigation and companion robots for vulnerable groups",
+      "Real-time information services linked with urban IoT infrastructure",
+      "Behavior norms and safety feedback design for robots in public spaces"
+    ]
   },
   {
     id: 'custom',
@@ -297,10 +244,14 @@ export default function FutureSignalsPage() {
     { id: 4, label: t('Visual Assets', '视觉素材', lang), path: '/visual-assets' },
   ];
   const [futureSignals, setFutureSignals] = useState<ThemeData[]>([]);
+  // 默认选中第一个机器人主题（id: 1）
   const [selectedId, setSelectedId] = useState<number | 'custom'>(1);
   const [customTopic, setCustomTopic] = useState('');
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [userNotes, setUserNotes] = useState('');
+  const [analysisResult, setAnalysisResult] = useState('');
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
   useEffect(() => {
     // 直接使用静态数据，不再从CSV加载
@@ -317,7 +268,9 @@ export default function FutureSignalsPage() {
         if (savedTheme) {
           try {
             const theme = JSON.parse(savedTheme);
-            setSelectedId(theme.id);
+            // 如果历史里的 id 在新列表中不存在，则退回到 1
+            const exists = THEMES_DATA.some(t => t.id === theme.id);
+            setSelectedId(exists ? theme.id : 1);
             if (theme.id === 'custom' && theme.title) setCustomTopic(theme.title);
           } catch (e) {
             console.error('Error parsing saved theme:', e);
@@ -415,17 +368,17 @@ export default function FutureSignalsPage() {
           {/* Gallery视图内容 - 紧凑布局，可滚动 */}
           <div className="flex-1 p-4 overflow-y-auto min-h-0">
             <div className="w-full">
-              <div className="grid grid-cols-3 gap-2.5">
+              <div className="grid grid-cols-3 gap-3">
                 {futureSignals.map((item) => (
                   <div
                     key={String(item.id)}
-                    className={`cursor-pointer border-2 rounded-lg bg-gray-800 p-0 flex flex-col transition-all duration-300 overflow-hidden shadow-sm hover:shadow-md ${
+                    className={`cursor-pointer border-2 rounded-xl bg-gray-800/90 p-0 flex flex-col transition-all duration-300 overflow-hidden shadow-sm hover:shadow-lg ${
                       selectedId === item.id ? 'border-[#5157E8] ring-2 ring-[#5157E8]/50 shadow-lg' : 'border-gray-700 hover:border-[#5157E8]/50'
                     }`}
                     onClick={() => setSelectedId(item.id)}
                   >
                     {/* 顶部色块 */}
-                    <div className="flex items-center justify-between px-2 py-1.5 bg-gradient-to-r from-[#5157E8] to-[#3a3fa0]">
+                    <div className="flex items-center justify-between px-2.5 py-1.5 bg-gradient-to-r from-[#5157E8] to-[#3a3fa0]">
                       <div className="text-[10px] text-white font-medium whitespace-nowrap truncate">{item.sign}</div>
                       <span className="text-white text-xs">&gt;</span>
                     </div>
@@ -439,11 +392,11 @@ export default function FutureSignalsPage() {
                     </div>
                     {/* 标题 */}
                     <div className="px-2 pt-1 pb-0.5">
-                      <div className="text-xs font-bold text-[#5157E8] leading-tight line-clamp-2">{lang === 'zh' ? item.title : item.titleEn}</div>
+                      <div className="text-[11px] font-semibold text-[#E5E7FF] leading-tight line-clamp-2">{lang === 'zh' ? item.title : item.titleEn}</div>
                     </div>
                     {/* 简介 */}
                     <div className="px-2 pb-1.5">
-                      <div className="text-gray-400 text-[10px] leading-snug line-clamp-2">
+                      <div className="text-gray-400 text-[10px] leading-snug line-clamp-3">
                         {lang === 'zh' ? item.summary : item.summaryEn}
                       </div>
                     </div>
@@ -460,7 +413,8 @@ export default function FutureSignalsPage() {
             <span className="text-xl font-bold text-[#5157E8]">{t('Theme Details', '主题详情', lang)}</span>
           </div>
           
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="flex-1 p-6 overflow-y-auto space-y-6">
+            {/* 主题详情 */}
             {selectedId === 'custom' ? (
               <div className="space-y-4">
                 <div className="flex items-center gap-3">
@@ -536,6 +490,102 @@ export default function FutureSignalsPage() {
             ) : (
               <div className="text-center text-gray-400 py-12">{t('Please select a theme on the left', '请在左侧选择一个主题', lang)}</div>
             )}
+
+            {/* 用户素材输入 + 未来信号分析 */}
+            <div className="mt-2 pt-4 border-t border-gray-700/60 space-y-3">
+              <h3 className="text-sm font-semibold text-white flex items-center gap-2">
+                🔍 {t('Refine Future Signal', '分析并提炼未来信号', lang)}
+              </h3>
+              <p className="text-xs text-gray-400">
+                {t(
+                  'Paste your collected materials (cases, observations, data, etc.) here. AI will combine them with the current theme to generate a more focused future signal/topic, and you can freely edit the result.',
+                  '在这里粘贴你收集到的素材（案例、观察、数据等），AI 会结合当前主题，帮你生成一个更聚焦的未来信号 / 选题，你也可以在结果里继续自由编辑。',
+                  lang
+                )}
+              </p>
+              <textarea
+                value={userNotes}
+                onChange={(e) => setUserNotes(e.target.value)}
+                placeholder={
+                  lang === 'zh'
+                    ? '例如：\n- 最近看到某某场景中已经在使用送餐机器人…\n- 观察到老人对服务机器人存在哪些担忧或期待…\n- 收集到的行业报告中的关键数据…'
+                    : 'For example:\n- Cases where service robots are already used…\n- Observations about user concerns/expectations…\n- Key data points from industry reports…'
+                }
+                className="w-full h-28 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-[#5157E8] focus:ring-2 focus:ring-[#5157E8]/30 outline-none text-xs resize-none"
+              />
+              <div className="flex items-center justify-between gap-2">
+                <button
+                  type="button"
+                  disabled={isAnalyzing || !userNotes.trim() || !selected}
+                  onClick={async () => {
+                    if (!selected) return;
+                    setIsAnalyzing(true);
+                    try {
+                      const res = await axios.post('/api/theme-future-signal', {
+                        theme: selected,
+                        userNotes,
+                        lang,
+                      });
+                      if (res.data?.success && res.data.raw) {
+                        setAnalysisResult(res.data.raw);
+                      } else {
+                        alert(
+                          (lang === 'zh' ? '分析失败: ' : 'Failed to analyze: ') +
+                            (res.data?.error || (lang === 'zh' ? '请稍后重试' : 'Please try again later'))
+                        );
+                      }
+                    } catch (err: any) {
+                      console.error('analyze future signal error', err);
+                      const msg =
+                        err?.response?.data?.error ||
+                        (lang === 'zh' ? '请检查 DEEPSEEK_API_KEY 配置后重试' : 'Please check DEEPSEEK_API_KEY config and try again');
+                      alert((lang === 'zh' ? '分析失败: ' : 'Failed to analyze: ') + msg);
+                    } finally {
+                      setIsAnalyzing(false);
+                    }
+                  }}
+                  className={`px-3 py-1.5 rounded-full text-xs font-medium transition-all ${
+                    isAnalyzing || !userNotes.trim() || !selected
+                      ? 'bg-gray-700 text-gray-400 cursor-not-allowed'
+                      : 'bg-[#5157E8] text-white hover:bg-[#3a3fa0] shadow'
+                  }`}
+                >
+                  {isAnalyzing
+                    ? t('Analyzing...', '正在分析...', lang)
+                    : t('Analyze Future Signal', '分析未来信号', lang)}
+                </button>
+                <span className="text-[10px] text-gray-500">
+                  {t('AI will generate an editable draft', 'AI 将生成一份可自行修改的草稿', lang)}
+                </span>
+              </div>
+
+              <div>
+                <div className="flex items-center justify-between mb-1.5">
+                  <span className="text-xs font-semibold text-white">
+                    ✏️ {t('Future Signal Draft', '未来信号草稿（可编辑）', lang)}
+                  </span>
+                  {analysisResult && (
+                    <button
+                      type="button"
+                      className="text-[10px] text-gray-400 hover:text-gray-200 underline-offset-2 hover:underline"
+                      onClick={() => setAnalysisResult('')}
+                    >
+                      {t('Clear', '清空', lang)}
+                    </button>
+                  )}
+                </div>
+                <textarea
+                  value={analysisResult}
+                  onChange={(e) => setAnalysisResult(e.target.value)}
+                  placeholder={
+                    lang === 'zh'
+                      ? '点击「分析未来信号」后，这里会出现一份可编辑的未来信号草稿。你可以在此基础上自由增删、修改。'
+                      : 'After clicking \"Analyze Future Signal\", an editable draft will appear here. You can freely refine it.'
+                  }
+                  className="w-full h-32 px-3 py-2 bg-gray-800 border border-gray-600 rounded-lg text-white placeholder-gray-500 focus:border-[#5157E8] focus:ring-2 focus:ring-[#5157E8]/30 outline-none text-xs resize-none"
+                />
+              </div>
+            </div>
           </div>
           {/* 底部确认按钮 */}
           <div className="flex-none p-4 flex justify-end">
